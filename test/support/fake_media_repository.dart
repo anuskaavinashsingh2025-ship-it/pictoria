@@ -98,15 +98,15 @@ class FakeMediaRepository implements MediaRepository {
     required int height,
   }) async => null;
 
-  /// What [loadVideoFile] returns. The file is never opened: viewer tests
-  /// pass a fake player factory.
-  File? videoFile = File('fake_video.mp4');
-  int videoFileCalls = 0;
+  /// What [loadVideo] returns. The file is never opened: viewer tests pass
+  /// a fake player factory.
+  VideoSource? video = FileVideoSource(File('fake_video.mp4'));
+  int videoCalls = 0;
 
   @override
-  Future<File?> loadVideoFile(MediaItem item) async {
-    videoFileCalls++;
-    return videoFile;
+  Future<VideoSource?> loadVideo(MediaItem item) async {
+    videoCalls++;
+    return video;
   }
 
   @override

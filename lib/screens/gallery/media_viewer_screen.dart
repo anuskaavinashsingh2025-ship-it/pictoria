@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../data/media/media_filters.dart';
 import '../../data/media/media_item.dart';
@@ -20,7 +19,7 @@ class MediaViewerScreen extends StatelessWidget {
     super.key,
     required this.item,
     required this.controller,
-    this.createVideoController = VideoPlayerController.file,
+    this.createVideoController = createVideoPlayer,
   });
 
   final MediaItem item;
@@ -69,7 +68,7 @@ class MediaViewerScreen extends StatelessWidget {
                     key: ValueKey(item.id),
                     item: item,
                     poster: picture,
-                    loadFile: () => controller.videoFileFor(item),
+                    loadVideo: () => controller.videoFor(item),
                     createController: createVideoController,
                   )
                 : InteractiveViewer(maxScale: 4, child: picture),

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -134,11 +132,12 @@ class DeviceMediaRepository implements MediaRepository {
   }
 
   @override
-  Future<File?> loadVideoFile(MediaItem item) async {
+  Future<VideoSource?> loadVideo(MediaItem item) async {
     try {
       final asset = await _assetFor(item.id);
       if (asset == null || asset.type != AssetType.video) return null;
-      return await asset.file;
+      final file = await asset.file;
+      return file == null ? null : FileVideoSource(file);
     } catch (error) {
       debugPrint('Video file failed for ${item.id}: $error');
       return null;

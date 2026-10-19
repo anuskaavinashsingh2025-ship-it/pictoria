@@ -34,7 +34,8 @@ class DemoPhoto {
   /// shows a "Today" and "Yesterday" section no matter when it is run.
   final int daysAgo;
 
-  /// Demo-only: a few stills are marked as videos to exercise the UI.
+  /// Demo videos are short clips made from their photo (see
+  /// assets/demo_media/ATTRIBUTION.md); the photo is their thumbnail.
   final MediaKind kind;
   final Duration? duration;
 
@@ -42,6 +43,10 @@ class DemoPhoto {
   final bool initiallyFavorite;
 
   String get assetPath => 'assets/demo_media/$id.jpg';
+
+  /// The playable clip, for videos only.
+  String? get videoAssetPath =>
+      kind == MediaKind.video ? 'assets/demo_media/$id.mp4' : null;
 
   /// Converts to the shared [MediaItem] model, dated relative to [now].
   MediaItem toMediaItem(DateTime now) {
@@ -54,7 +59,7 @@ class DemoPhoto {
       height: height,
       duration: duration,
       title: title,
-      mimeType: 'image/jpeg',
+      mimeType: kind == MediaKind.video ? 'video/mp4' : 'image/jpeg',
       assetPath: assetPath,
       tags: tags,
     );
@@ -105,7 +110,7 @@ const demoPhotos = <DemoPhoto>[
     height: 1348,
     daysAgo: 0,
     kind: MediaKind.video,
-    duration: Duration(seconds: 24),
+    duration: Duration(seconds: 8),
     tags: ['dog', 'pet', 'beach', 'sea'],
   ),
   DemoPhoto(
@@ -134,7 +139,7 @@ const demoPhotos = <DemoPhoto>[
     height: 1357,
     daysAgo: 1,
     kind: MediaKind.video,
-    duration: Duration(seconds: 12),
+    duration: Duration(seconds: 6),
     tags: ['friends', 'picnic', 'people'],
   ),
   DemoPhoto(
@@ -187,7 +192,7 @@ const demoPhotos = <DemoPhoto>[
     height: 1350,
     daysAgo: 3,
     kind: MediaKind.video,
-    duration: Duration(seconds: 41),
+    duration: Duration(seconds: 10),
     tags: ['sunset', 'birds', 'sea', 'sky'],
   ),
   DemoPhoto(

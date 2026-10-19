@@ -31,6 +31,13 @@ not allow compiling these photos into a competing photo service.
 | `lab_with_tulip.jpg` | Richard Brutyo (@richardbrutyo) | https://unsplash.com/photos/Sg3XwuEpybU |
 | `birds_sunset.jpg` | Jason Pischke (@jrpischke) | https://unsplash.com/photos/xVSyLQxEprw |
 
+## Demo video clips
+
+`dog_beach_run.mp4`, `friends_picnic.mp4` and `birds_sunset.mp4` were made
+from the photos of the same name (credited above) as short, silent slow-zoom
+clips: 720 px wide, H.264, 6–10 seconds. They are demo content only, like the
+photos.
+
 ## Font
 
 `assets/fonts/DMSerifDisplay-Regular.ttf` is DM Serif Display, licensed under

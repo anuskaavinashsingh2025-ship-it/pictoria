@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pictoria/data/demo_media.dart';
 import 'package:pictoria/data/media/media_item.dart';
+import 'package:pictoria/data/media/media_repository.dart';
 import 'package:pictoria/screens/gallery/media_viewer_screen.dart';
 import 'package:pictoria/state/gallery_controller.dart';
 import 'package:video_player/video_player.dart';
@@ -84,6 +85,7 @@ void main() {
   late FakeMediaRepository repository;
   late GalleryController gallery;
   late List<FakeVideoPlayerController> created;
+  late List<VideoSource> sources;
   FakeVideoPlayerController Function() makePlayer =
       FakeVideoPlayerController.new;
 
@@ -91,12 +93,14 @@ void main() {
     repository = FakeMediaRepository();
     gallery = GalleryController(deviceRepository: repository);
     created = [];
+    sources = [];
     makePlayer = FakeVideoPlayerController.new;
   });
 
   tearDown(() => gallery.dispose());
 
-  VideoPlayerController factory(File file) {
+  VideoPlayerController factory(VideoSource source) {
+    sources.add(source);
     final player = makePlayer();
     created.add(player);
     return player;
@@ -148,7 +152,7 @@ void main() {
     expect(find.text('IMG_1.HEIC'), findsOneWidget);
     expect(find.bySemanticsLabel('Play video'), findsNothing);
     expect(created, isEmpty);
-    expect(repository.videoFileCalls, 0);
+    expect(repository.videoCalls, 0);
   });
 
   testWidgets('shows a loading state until the video is ready', (tester) async {
@@ -215,27 +219,23 @@ void main() {
   });
 
   testWidgets('shows an error when there is no file to play', (tester) async {
-    repository.videoFile = null;
+    repository.video = null;
     await openViewer(tester, _video);
 
     expect(find.text("This video can't be played right now."), findsOneWidget);
     expect(created, isEmpty);
   });
 
-  testWidgets('demo videos explain they are stills', (tester) async {
-    const demoVideo = MediaItem(
-      id: 'demo-video',
-      kind: MediaKind.video,
-      createdAt: null,
-      assetPath: 'assets/demo_media/pink_tulips.jpg',
-    );
+  testWidgets('demo videos play their bundled clip', (tester) async {
+    final demoVideo = demoPhotos
+        .firstWhere((photo) => photo.kind == MediaKind.video)
+        .toMediaItem(DateTime.now());
     await openViewer(tester, demoVideo);
 
-    expect(
-      find.text('Demo videos are still photos, so there is nothing to play.'),
-      findsOneWidget,
-    );
-    expect(created, isEmpty);
+    final source = sources.single as AssetVideoSource;
+    expect(source.assetPath, 'assets/demo_media/${demoVideo.id}.mp4');
+    expect(find.bySemanticsLabel('Play video'), findsOneWidget);
+    expect(repository.videoCalls, 0, reason: 'demo items skip the device');
   });
 
   testWidgets('closing the viewer disposes the player', (tester) async {

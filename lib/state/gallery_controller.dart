@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -384,10 +382,10 @@ class GalleryController extends ChangeNotifier {
     );
   }
 
-  /// A playable file for a video [item], or null when it can't be played
-  /// (demo videos are stills). Not cached: the platform may clean it up.
-  Future<File?> videoFileFor(MediaItem item) =>
-      (item.isDemo ? _demo : _device).loadVideoFile(item);
+  /// Where to play a video [item] from, or null when it can't be played.
+  /// Not cached: the platform may clean up exported files.
+  Future<VideoSource?> videoFor(MediaItem item) =>
+      (item.isDemo ? _demo : _device).loadVideo(item);
 
   /// File size and type, fetched once per item and then remembered.
   Future<MediaDetails> detailsFor(MediaItem item) {

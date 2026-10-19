@@ -16,6 +16,23 @@ class MediaDetails {
   final String? mimeType;
 }
 
+/// Where a playable video lives: a file on the device, or a bundled asset.
+sealed class VideoSource {
+  const VideoSource();
+}
+
+class FileVideoSource extends VideoSource {
+  const FileVideoSource(this.file);
+
+  final File file;
+}
+
+class AssetVideoSource extends VideoSource {
+  const AssetVideoSource(this.assetPath);
+
+  final String assetPath;
+}
+
 /// A friendly, displayable error from the media layer.
 class MediaLoadException implements Exception {
   const MediaLoadException(this.message, [this.cause]);
@@ -121,10 +138,9 @@ abstract class MediaRepository {
     required int height,
   });
 
-  /// A local file the video player can open for a video [item], or null when
-  /// it can't be read (deleted, not downloaded, or not a real video). Must
-  /// never throw.
-  Future<File?> loadVideoFile(MediaItem item);
+  /// Where the video player can open a video [item], or null when it can't
+  /// be read (deleted, not downloaded, or not a video). Must never throw.
+  Future<VideoSource?> loadVideo(MediaItem item);
 
   /// File size and type for [item]. Fields are null when unavailable.
   Future<MediaDetails> loadDetails(MediaItem item);

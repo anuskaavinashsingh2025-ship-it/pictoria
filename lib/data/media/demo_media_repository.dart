@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 
 import '../demo_media.dart';
@@ -61,14 +59,25 @@ class DemoMediaRepository implements MediaRepository {
     required int height,
   }) async => null;
 
-  /// Demo "videos" are bundled stills, so there is nothing to play.
+  /// Demo videos are short clips bundled next to their poster photo.
   @override
-  Future<File?> loadVideoFile(MediaItem item) async => null;
+  Future<VideoSource?> loadVideo(MediaItem item) async {
+    final path = _videoPathFor(item);
+    return path == null ? null : AssetVideoSource(path);
+  }
+
+  String? _videoPathFor(MediaItem item) {
+    for (final photo in demoPhotos) {
+      if (photo.id == item.id) return photo.videoAssetPath;
+    }
+    return null;
+  }
 
   @override
   Future<MediaDetails> loadDetails(MediaItem item) async {
     try {
-      final data = await _bundle.load(item.assetPath!);
+      // For videos, report the clip's size rather than its poster's.
+      final data = await _bundle.load(_videoPathFor(item) ?? item.assetPath!);
       return MediaDetails(
         fileSizeBytes: data.lengthInBytes,
         mimeType: item.mimeType,

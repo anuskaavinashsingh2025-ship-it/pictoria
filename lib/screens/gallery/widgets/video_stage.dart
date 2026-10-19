@@ -1,16 +1,23 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../data/media/media_filters.dart';
 import '../../../data/media/media_item.dart';
+import '../../../data/media/media_repository.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_tokens.dart';
 
-/// Builds a player for a local video file. Tests pass a fake one, so they
-/// never need real playback.
-typedef VideoControllerFactory = VideoPlayerController Function(File file);
+/// Builds a player for a video source. Tests pass a fake one, so they never
+/// need real playback.
+typedef VideoControllerFactory = VideoPlayerController Function(
+  VideoSource source,
+);
+
+/// The real player for a device file or a bundled demo clip.
+VideoPlayerController createVideoPlayer(VideoSource source) => switch (source) {
+  FileVideoSource(:final file) => VideoPlayerController.file(file),
+  AssetVideoSource(:final assetPath) => VideoPlayerController.asset(assetPath),
+};
 
 /// Plays one video in the full-screen viewer.
 ///
@@ -25,13 +32,13 @@ class VideoStage extends StatefulWidget {
     super.key,
     required this.item,
     required this.poster,
-    required this.loadFile,
-    this.createController = VideoPlayerController.file,
+    required this.loadVideo,
+    this.createController = createVideoPlayer,
   });
 
   final MediaItem item;
   final Widget poster;
-  final Future<File?> Function() loadFile;
+  final Future<VideoSource?> Function() loadVideo;
   final VideoControllerFactory createController;
 
   @override
@@ -41,7 +48,7 @@ class VideoStage extends StatefulWidget {
 class _VideoStageState extends State<VideoStage> with WidgetsBindingObserver {
   VideoPlayerController? _player;
 
-  /// True when there is no file to play or the player couldn't open it.
+  /// True when there is nothing to play or the player couldn't open it.
   bool _failed = false;
 
   @override
@@ -52,15 +59,16 @@ class _VideoStageState extends State<VideoStage> with WidgetsBindingObserver {
   }
 
   Future<void> _open() async {
-    final file = await widget.loadFile();
+    final source = await widget.loadVideo();
     if (!mounted) return;
-    if (file == null) {
+    if (source == null) {
       setState(() => _failed = true);
       return;
     }
     // Assigned before awaiting, so dispose() cleans it up if the viewer
     // closes while the video is still loading.
-    final player = widget.createController(file)..addListener(_onPlayerChanged);
+    final player = widget.createController(source)
+      ..addListener(_onPlayerChanged);
     _player = player;
     try {
       await player.initialize();
@@ -109,11 +117,7 @@ class _VideoStageState extends State<VideoStage> with WidgetsBindingObserver {
         // Hidden (not removed) once the video shows, so the Hero keeps it.
         Opacity(opacity: ready ? 0 : 1, child: widget.poster),
         if (failed)
-          _VideoMessage(
-            message: widget.item.isDemo
-                ? 'Demo videos are still photos, so there is nothing to play.'
-                : "This video can't be played right now.",
-          )
+          const _VideoMessage(message: "This video can't be played right now.")
         else if (!ready)
           Center(
             child: Semantics(
